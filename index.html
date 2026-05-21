@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<<<<<<< HEAD
+    <style>
+        body { margin: 0; background: #05070c; overflow: hidden; }
+        #canvas-wrapper { position: relative; width: 100vw; height: 100vh; }
+        video, canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+    </style>
+</head>
+<body>
+    <div id="canvas-wrapper">
+        <video id="webcam" autoplay playsinline></video>
+        <canvas id="output"></canvas>
+    </div>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
+=======
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Image to PDF</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0f172a; color: #f8fafc; font-family: sans-serif; }
+        .drop-zone { border: 2px dashed #334155; transition: all 0.3s; }
+        .drop-zone.active { border-color: #38bdf8; background: #1e293b; }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-6">
+
+    <div class="max-w-xl w-full text-center">
+        <h1 class="text-4xl font-bold mb-2 tracking-tight">PDF ARCHITECT</h1>
+        <p class="text-slate-400 mb-8">Client-side conversion. Zero server lag.</p>
+
+        <div id="dropZone" class="drop-zone rounded-xl p-12 mb-6 cursor-pointer">
+            <p class="text-lg">Drop JPG or PNG files here</p>
+            <p class="text-sm text-slate-500 mt-2">or click to browse</p>
+            <input type="file" id="fileInput" multiple accept="image/*" class="hidden">
+        </div>
+
+        <div id="fileList" class="text-left mb-6 space-y-2"></div>
+
+        <button id="convertBtn" class="w-full bg-sky-500 hover:bg-sky-400 text-white font-bold py-3 rounded-lg hidden transition shadow-lg shadow-sky-500/20">
+            GENERATE MULTI-PAGE A4 PDF
+        </button>
+    </div>
+
+    <script>
+        const { jsPDF } = window.jspdf;
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const convertBtn = document.getElementById('convertBtn');
+        const fileList = document.getElementById('fileList');
+        let filesArray = [];
+
+        dropZone.onclick = () => fileInput.click();
+
+        fileInput.onchange = (e) => handleFiles(e.target.files);
+
+        function handleFiles(files) {
+            filesArray = [...files];
+            fileList.innerHTML = filesArray.map(f => `<div class="bg-slate-800 p-2 rounded text-sm">📄 ${f.name}</div>`).join('');
+            if (filesArray.length > 0) convertBtn.classList.remove('hidden');
+        }
+
+        convertBtn.onclick = async () => {
+            const pdf = new jsPDF('p', 'pt', 'a4');
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+
+            for (let i = 0; i < filesArray.length; i++) {
+                const imgData = await readFileAsDataURL(filesArray[i]);
+                const img = await loadImage(imgData);
+                
+                // Aspect Ratio Math
+                const ratio = Math.min(pageWidth / img.width, pageHeight / img.height);
+                const width = img.width * ratio;
+                const height = img.height * ratio;
+                const x = (pageWidth - width) / 2;
+                const y = (pageHeight - height) / 2;
+
+                if (i > 0) pdf.addPage();
+                pdf.addImage(imgData, 'JPEG', x, y, width, height);
+            }
+
+            pdf.save('converted_documents.pdf');
+        };
+
+        const readFileAsDataURL = (file) => new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(file);
+        });
+
+        const loadImage = (url) => new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.src = url;
+        });
+    </script>
+</body>
+</html>
+>>>>>>> abab71983fc490245ba0b867d0751eba32b65821
